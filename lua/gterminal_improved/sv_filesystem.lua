@@ -1,64 +1,109 @@
 local Filesystem = {}
 
 
-function Filesystem:Initialize(ent)
-    ent.gti_files = {
+local names_blacklist = {
+    ["_parent"] = true,
+    ["_isdir"] = true,
+    ["_isfile"] = true,
+    ["_name"] = true,
+}
+
+
+function Filesystem.Initialize(ent)
+    ent.files = {
         ["C:/"] = {
             _isdir = true,
             _name = "C:/"
         }
     }
-
-    ent.gti_cur_dir = ent.gti_files["C:/"]
+    
+    ent.current_directory = ent.files["C:/"]
 end
 
-function Filesystem:MakeDirectory(ent, name)
-    local cur_dir = ent.gti_cur_dir
+
+function Filesystem.MakeDirectory(ent, name)
+    local cur_dir = ent.current_directory
+
+    if !name then return end
+
+    if names_blacklist[name] then
+        gTerminal:Broadcast(ent, "Invalid name!", GT_COL_ERR)
+        return
+    end
+
+    if cur_dir[name] then
+        gTerminal:Broadcast(ent, "Directory already exists!", GT_COL_ERR)
+        return
+    end
 
     cur_dir[name] = {
-        _name = name,
         _isdir = true,
+        _name = name,
         _parent = cur_dir,
     }
-
-    return true
 end
 
-function Filesystem:GetWorkingDirectory(ent)
-    local cur_dir = ent.gti_cur_dir
-    local str = ""
+function Filesystem.RemoveDirectory(ent, name)
+    local cur_dir = ent.current_directory
 
-    while cur_dir._parent do
-        str = cur_dir._name .. "/" .. str 
-        cur_dir = cur_dir._parent
+    if !name then return end
+
+    if names_blacklist[name] then
+        gTerminal:Broadcast(ent, "Invalid name!", GT_COL_ERR)
+        return
     end
-    str = "C:/" .. str
 
-    return str
+    if !cur_dir[name] then
+        gTerminal:Broadcast(ent, "Directory is not exists!", GT_COL_ERR)
+        return
+    end
+
+    cur_dir[name] = nil
 end
 
-function Filesystem:GetFileNamesInLocalDirectory(ent)
-    local cur_dir = ent.gti_cur_dir
+function Filesystem.ChangeDirectory(ent, name)
+    local cur_dir = ent.current_directory
 
-    local tbl = {}
-    for k, v in pairs(cur_dir) do
-        if istable(v) and v._isdir and k != "_parent" then
-            tbl[#tbl + 1] = v._name
-        end
+    if !name then return end
+
+    if names_blacklist[name] then
+        gTerminal:Broadcast(ent, "Invalid name!", GT_COL_ERR)
+        return
     end
 
-    return tbl
+    if name == "../" then ent.current_directory = cur_dir._parent or cur_dir return end
+    if cur_dir[name] then ent.current_directory = cur_dir[name] end
 end
 
-function Filesystem:ChangeDirectory(ent, name)
-    local cur_dir = ent.gti_cur_dir
-    if cur_dir[name] then
-        ent.gti_cur_dir = cur_dir[name] 
+
+function Filesystem.MakeFile(ent, name)
+    local cur_dir = ent.current_directory
+
+    if !name then return end
+
+    if names_blacklist[name] then
+        gTerminal:Broadcast(ent, "Invalid name!", GT_COL_ERR)
+        return
     end
 
-    if name == ".." then
-        ent.gti_cur_dir = cur_dir._parent or cur_dir
+    name = name .. ".txt"
+    cur_dir[name] = {
+        _isfile = true,
+        _name = name,
+    }
+end
+
+function Filesystem.GetFile(ent, name)
+    local cur_dir = ent.current_directory
+
+    if !name then return end
+
+    if names_blacklist[name] then
+        gTerminal:Broadcast(ent, "Invalid name!", GT_COL_ERR)
+        return
     end
+
+    return cur_dir[name .. ".txt"]
 end
 
 gTerminal.Improved.Filesystem = Filesystem
