@@ -1,13 +1,14 @@
 local OS = OS;
 
 include("sv_commands.lua");
+include("gterminal_improved/sh_init.lua")
 
 function OS:GetName()
 	return "PersonalOS";
 end;
 
 function OS:GetUniqueID()
-	return "personal_improved";
+	return GetConVar("gt_os_override"):GetBool() and "personal" or "personal_imp";
 end;
 
 function OS:GetWarmUpText()
@@ -16,6 +17,7 @@ function OS:GetWarmUpText()
 		" | _ \\ __| _ \\/ __|/ _ \\| \\| | /_\\ | |   ",
 		" |  _/ _||   /\\__ \\ (_) | .` |/ _ \\| |__ ",
 		" |_| |___|_|_\\|___/\\___/|_|\\_/_/ \\_\\____|",
-		" The operating system for your personal needs."
+		" The operating system for your personal needs.",
+		"   Improved build 100122",
 	};
 end;
