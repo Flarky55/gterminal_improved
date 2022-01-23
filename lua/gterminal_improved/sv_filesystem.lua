@@ -1,5 +1,10 @@
 local Filesystem = {}
 
+
+util.AddNetworkString("gTerminal.Improved.Editor.Open")
+util.AddNetworkString("gTerminal.Improved.Editor.Save")
+
+
 Filesystem.commands = {
 	["cd"] = {
 		func = function(cl, ent, args)
@@ -41,7 +46,16 @@ Filesystem.commands = {
 	},
 	["touch"] = {
 		func = function(cl, ent, args)
-			Filesystem.CreateFile(ent, args[2], args[3])
+			local name = args[2] or "new_file.txt"
+			
+			local _file
+			if name then _file = Filesystem.GetFile(ent, name) end
+
+			net.Start("gTerminal.Improved.Editor.Open")
+				net.WriteEntity(ent)
+				net.WriteString(name)
+				net.WriteString(_file and _file.content or "")
+			net.Send(cl)
 		end,
 		help = "Create file",
 	},
@@ -52,6 +66,12 @@ Filesystem.commands = {
 			if file and file.content then gTerminal:Broadcast(ent, file.content) end
 		end,
 		help = "Read file",
+	},
+	["rm"] = {
+		func = function(cl, ent, args)
+			Filesystem.RemoveObject(ent, args[2])
+		end,
+		help = "Remove object",
 	},
 }
 
@@ -117,6 +137,14 @@ function Filesystem.CreateFile(ent, name, content)
     }
 end
 
+function Filesystem.EditFileContent(ent, name, new_content)
+	local cur_dir = ent.cur_dir
+
+	if !name or bad_names[name] or !cur_dir[name] then return end
+
+	cur_dir[name].content = new_content
+end
+
 function Filesystem.GetFile(ent, name)
     local cur_dir = ent.cur_dir
 
@@ -125,13 +153,29 @@ function Filesystem.GetFile(ent, name)
     return cur_dir[name]
 end
 
+net.Receive("gTerminal.Improved.Editor.Save", function(len, ply)
+	local ent = net.ReadEntity()
+	local file_name, content = net.ReadString(), net.ReadString()
+
+	if !IsValid(ent) or ( IsValid(ent) and !ent.SetOS or (ent.SetOS and ent:GetUser() != ply) ) then 
+		ply:ChatPrint("ЭЭЭ, КУДА ПРЁШЬ, НЕ ВИДИШЬ, ЗАЩИТА СТОИТ?")
+		return 
+	end
+
+	if Filesystem.GetFile(ent, file_name) then
+		Filesystem.EditFileContent(ent, file_name, content)
+	else
+		Filesystem.CreateFile(ent, file_name, content)
+	end
+end)
+
 
 function Filesystem.RemoveObject(ent, name)
     local cur_dir = ent.cur_dir
 
     if !name or bad_names[name] or !cur_dir[name] then return end
 
-    return cur_dir[name]
+    cur_dir[name] = nil 
 end
 
 

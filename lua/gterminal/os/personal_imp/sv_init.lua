@@ -1,7 +1,12 @@
 local OS = OS;
 
-include("sv_commands.lua");
+
+AddCSLuaFile("gterminal_improved/sh_init.lua")
 include("gterminal_improved/sh_init.lua")
+
+
+include("sv_commands.lua");
+
 
 function OS:GetName()
 	return "PersonalOS";

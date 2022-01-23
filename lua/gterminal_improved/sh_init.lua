@@ -1,3 +1,4 @@
+local gTerminal = gTerminal
 gTerminal.Improved = gTerminal.Improved or {}
 
 MsgC(Color(0, 255, 0), "Initialized gTerminal Improved!\n")
@@ -6,6 +7,8 @@ MsgC(Color(0, 255, 0), "Initialized gTerminal Improved!\n")
 if SERVER then
     include("gterminal_improved/sv_filesystem.lua")
     include("gterminal_improved/sv_gnet.lua")
+    
+    AddCSLuaFile("gterminal_improved/cl_editor.lua")
     
     
     CreateConVar("gt_os_override", "0", {FCVAR_ARCHIVE}, "Should gTerminal-Improved override default personal and server os")
@@ -18,14 +21,15 @@ if SERVER then
     
         local index = entity:EntIndex();
         local output;
+        local maxChars = entity.maxChars or 50
     
-        if (utf8.len(text) > 50) then
+        if (utf8.len(text) > maxChars) then
             output = {};
     
-            local expected = math.floor(utf8.len(text) / 50);
+            local expected = math.floor(utf8.len(text) / maxChars);
     
             for i = 0, expected do
-                output[i + 1] = utf8.sub(text, i * 50, (i * 50) + 49);
+                output[i + 1] = utf8.sub(text, i * maxChars, (i * maxChars) + maxChars - 1);
             end;
         end;
     
@@ -55,11 +59,35 @@ if SERVER then
 end
 
 if CLIENT then
+    include("gterminal_improved/cl_editor.lua")
+
+
+    net.Receive("gT_AddLine", function(length)
+        local index = net.ReadUInt(16);
+        local text = net.ReadString();
+        local colorType = net.ReadUInt(8);
+        local position = net.ReadInt(16);
+    
+        if ( !gTerminal[index] ) then
+            gTerminal[index] = {};
+        end;
+    
+        if (!position or position == -1) then
+            table.insert( gTerminal[index], {text = text, color = colorType} );
+        else
+            gTerminal[index][position] = {text = text, color = colorType};
+        end;
+    
+        if (#gTerminal[index] > Entity(index).maxLines ) then
+            table.remove(gTerminal[index], 1);
+        end;
+    end);
+    
     net.Receive("gT_ActiveConsole", function()
         local index = net.ReadUInt(16);
         local entity = Entity(index);
         local client = LocalPlayer();
-    
+
         if ( IsValid(entity) ) then
             client.gT_Entity = entity;
             client.gT_TextEntry = vgui.Create("DTextEntry");
@@ -70,9 +98,11 @@ if CLIENT then
             client.gT_TextEntry.OnTextChanged = function(textEntry)
                 local offset = 0;
                 local text = textEntry:GetValue();
-    
-                if (utf8.len(text) > 50) then
-                    offset = textEntry:GetCaretPos() - 47;
+                local maxChars = entity.maxChars or 50
+
+
+                if (utf8.len(text) > maxChars) then
+                    offset = textEntry:GetCaretPos() - maxChars - 3;
                 end;
     
                 entity.consoleText = utf8.sub(text, offset);
