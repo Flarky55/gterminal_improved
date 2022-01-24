@@ -4,6 +4,31 @@ gTerminal.Improved = gTerminal.Improved or {}
 MsgC(Color(0, 255, 0), "Initialized gTerminal Improved!\n")
 
 
+GT_COL_NIL = 0;
+GT_COL_MSG = 1;
+GT_COL_WRN = 2;
+GT_COL_ERR = 3;
+GT_COL_INFO = 4;
+GT_COL_INTL = 5;
+GT_COL_CMD = 6;
+GT_COL_SUCC = 7;
+
+local colors = {
+    [GT_COL_NIL] = Color(50, 50, 50),
+    [GT_COL_MSG] = Color(200, 200, 200),
+    [GT_COL_WRN] = Color(255, 250, 50),
+    [GT_COL_ERR] = Color(255, 50, 50),
+    [GT_COL_INFO] = Color(60, 100, 250),
+    [GT_COL_INTL] = Color(60, 250, 250),
+    [GT_COL_CMD] = Color(125, 125, 125),
+    [GT_COL_SUCC] = Color(75, 255, 80)
+}
+
+function gTerminal:ColorFromIndex(code)
+    return colors[code] or colors[GT_COL_NIL]
+end
+
+
 if SERVER then
     include("gterminal_improved/sv_filesystem.lua")
     include("gterminal_improved/sv_gnet.lua")
@@ -39,12 +64,7 @@ if SERVER then
                     net.WriteUInt(index, 16);
                     net.WriteString(v);
                     net.WriteUInt(colorType or GT_COL_MSG, 8);
-    
-                    if (position) then
-                        net.WriteInt(position + (k - 1), 16);
-                    else
-                        net.WriteInt(-1, 16);
-                    end;
+                    net.WriteInt(position and position + (k - 1) or -1, 16)
                 net.Broadcast();
             end;
         else

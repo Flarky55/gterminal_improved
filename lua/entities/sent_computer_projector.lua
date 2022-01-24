@@ -9,12 +9,17 @@ ENT.Category = "gTerminal";
 ENT.Spawnable = true
 
 ENT.BackroundColor = Color(0, 0, 0, 225)
+ENT.scrW = 2048;
+ENT.scrH = 1024;
+ENT.lineHeight = 32;
+ENT.maxChars = 108;
+ENT.maxLines = 30;
 
 
 function ENT:GetScreenPos()
     local angle = self:GetAngles()
 
-    local offset = angle:Up() * 38.2 + angle:Forward() * 10 + angle:Right() * 27.9
+    local offset = angle:Up() * 25 + angle:Forward() * 5 + angle:Right() * 22
 
     return self:GetPos() + offset
 end

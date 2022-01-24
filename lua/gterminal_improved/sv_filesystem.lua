@@ -1,8 +1,8 @@
 local Filesystem = {}
 
 
-util.AddNetworkString("gTerminal.Improved.Editor.Open")
-util.AddNetworkString("gTerminal.Improved.Editor.Save")
+util.AddNetworkString("gTerminal_Improved.Editor.Open")
+util.AddNetworkString("gTerminal_Improved.Editor.Save")
 
 
 Filesystem.commands = {
@@ -51,7 +51,7 @@ Filesystem.commands = {
 			local _file
 			if name then _file = Filesystem.GetFile(ent, name) end
 
-			net.Start("gTerminal.Improved.Editor.Open")
+			net.Start("gTerminal_Improved.Editor.Open")
 				net.WriteEntity(ent)
 				net.WriteString(name)
 				net.WriteString(_file and _file.content or "")
@@ -99,7 +99,8 @@ end
 function Filesystem.CreateDir(ent, name)
     local cur_dir = ent.cur_dir
 
-    if !name or bad_names[name] or cur_dir[name] then return end
+    if !name or bad_names[name] then gTerminal:Broadcast(ent, "Invalid directory name!", GT_COL_ERR) return end
+	if cur_dir[name] then gTerminal:Broadcast(ent, "Directory already exists!", GT_COL_ERR) return end
 
     cur_dir[name] = {
         _isdir = true,
@@ -113,10 +114,14 @@ function Filesystem.ChangeDir(ent, name)
 
     if name == "../" then 
         ent.cur_dir = cur_dir._parent or cur_dir  
-        return 
+        return
+	elseif !name then
+		ent.cur_dir = ent.files["C:/"]
+		return
     end
 
-    if !name or bad_names[name] or !cur_dir[name] then return end
+    if bad_names[name] then gTerminal:Broadcast(ent, "Invalid directory name!", GT_COL_ERR) return end
+	if !cur_dir[name] then gTerminal:Broadcast(ent, "Directory is not exists!", GT_COL_ERR) return end
 
     ent.cur_dir = cur_dir[name]
 end
@@ -125,7 +130,8 @@ end
 function Filesystem.CreateFile(ent, name, content)
     local cur_dir = ent.cur_dir
 
-    if !name or bad_names[name] or cur_dir[name] then return end
+    if !name or bad_names[name] then gTerminal:Broadcast(ent, "Invalid file name!", GT_COL_ERR) return end
+	if cur_dir[name] then gTerminal:Broadcast(ent, "File already exists!", GT_COL_ERR) return end
 
     local extension = string.match(name, "^.+(%..+)$")
 
@@ -140,7 +146,8 @@ end
 function Filesystem.EditFileContent(ent, name, new_content)
 	local cur_dir = ent.cur_dir
 
-	if !name or bad_names[name] or !cur_dir[name] then return end
+	if !name or bad_names[name] then gTerminal:Broadcast(ent, "Invalid file name!", GT_COL_ERR) return end
+	if !cur_dir[name] then gTerminal:Broadcast(ent, "File is not exists!", GT_COL_ERR) return end
 
 	cur_dir[name].content = new_content
 end
@@ -148,17 +155,18 @@ end
 function Filesystem.GetFile(ent, name)
     local cur_dir = ent.cur_dir
 
-    if !name or bad_names[name] or !cur_dir[name] then return end
+    if !name or bad_names[name] then gTerminal:Broadcast(ent, "Invalid file name!", GT_COL_ERR) return end
+	if !cur_dir[name] then gTerminal:Broadcast(ent, "File is not exists!", GT_COL_ERR) return end
 
     return cur_dir[name]
 end
 
-net.Receive("gTerminal.Improved.Editor.Save", function(len, ply)
+net.Receive("gTerminal_Improved.Editor.Save", function(len, ply)
 	local ent = net.ReadEntity()
 	local file_name, content = net.ReadString(), net.ReadString()
 
 	if !IsValid(ent) or ( IsValid(ent) and !ent.SetOS or (ent.SetOS and ent:GetUser() != ply) ) then 
-		ply:ChatPrint("ЭЭЭ, КУДА ПРЁШЬ, НЕ ВИДИШЬ, ЗАЩИТА СТОИТ?")
+		ply:ChatPrint("ЭЭЭ, КУДА ПРЁШЬ?")
 		return 
 	end
 
@@ -173,7 +181,8 @@ end)
 function Filesystem.RemoveObject(ent, name)
     local cur_dir = ent.cur_dir
 
-    if !name or bad_names[name] or !cur_dir[name] then return end
+    if !name or bad_names[name] then gTerminal:Broadcast(ent, "Invalid name!", GT_COL_ERR) return end
+	if !cur_dir[name] then gTerminal:Broadcast(ent, "File is not exists!", GT_COL_ERR) return end
 
     cur_dir[name] = nil 
 end

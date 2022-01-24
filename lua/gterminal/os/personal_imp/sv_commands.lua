@@ -20,7 +20,7 @@ end, "Provides a list of help.");
 
 
 OS:NewCommand(":cls", function(client, entity)
-	for i = 0, 25 do
+	for i = 0, entity.maxLines do
 		timer.Simple(i * 0.05, function()
 			if ( IsValid(entity) ) then
 				gTerminal:Broadcast(entity, "", MSG_COL_NIL, i);
@@ -59,7 +59,7 @@ OS:NewCommand(":x", function(client, entity)
 	
 	timer.Simple(math.Rand(2, 5), function()
 		if ( IsValid(entity) ) then
-			for i = 0, 25 do
+			for i = 0, entity.maxLines do
 				if ( IsValid(entity) ) then
 					gTerminal:Broadcast(entity, "");
 				end;
@@ -101,7 +101,8 @@ OS:NewCommand(":gnet", function(client, entity, arguments)
 	if !command or !gnet_commands[command] then
 		gTerminal:Broadcast(entity, "Global Network Mark II");
 		gTerminal:Broadcast(entity, "  INFO:");
-		gTerminal:Broadcast(entity, "    Allows you to create networks.");
+		gTerminal:Broadcast(entity, "    With GNet you are able to communicate");
+		gTerminal:Broadcast(entity, "    through user created networks with ease.");
 		gTerminal:Broadcast(entity, "  HELP:");
 		for name, tbl in pairs(gnet_commands) do
 			gTerminal:Broadcast(entity, "    " .. name .. " - " .. tbl.help)

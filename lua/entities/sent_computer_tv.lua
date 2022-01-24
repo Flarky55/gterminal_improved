@@ -7,6 +7,12 @@ ENT.PrintName = "TV";
 ENT.Category = "gTerminal";
 ENT.Spawnable = true
 
+ENT.scrW = 2600;
+ENT.scrH = 1504;
+ENT.lineHeight = 32;
+ENT.maxChars = 150;
+ENT.maxLines = 45;
+
 
 function ENT:GetScreenPos()
     local angle = self:GetAngles()

@@ -20,13 +20,7 @@ function OS:GetWarmUpText()
 end;
 
 function OS:ShutDown(entity)
-	if (entity.networkID and entity.isHost) then
-		for k, v in pairs( ents.FindByClass(entity.ClassName) ) do
-			if (v.networkID == entity.networkID) then
-				gTerminal:Broadcast(v, "Lost connection to active network!", GT_COL_WRN);
-
-				v.networkID = nil;
-			end;
-		end;
+	if entity.gnet_host then
+		gTerminal.Improved.GNet	.Remove(entity)
 	end;
 end;

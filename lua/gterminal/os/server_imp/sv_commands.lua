@@ -20,7 +20,7 @@ end, "Provides a list of help.");
 
 
 OS:NewCommand(":cls", function(client, entity)
-	for i = 0, 25 do
+	for i = 0, entity.maxLines do
 		timer.Simple(i * 0.05, function()
 			if ( IsValid(entity) ) then
 				gTerminal:Broadcast(entity, "", MSG_COL_NIL, i);
@@ -59,7 +59,7 @@ OS:NewCommand(":x", function(client, entity)
 	
 	timer.Simple(math.Rand(2, 5), function()
 		if ( IsValid(entity) ) then
-			for i = 0, 25 do
+			for i = 0, entity.maxLines do
 				if ( IsValid(entity) ) then
 					gTerminal:Broadcast(entity, "");
 				end;

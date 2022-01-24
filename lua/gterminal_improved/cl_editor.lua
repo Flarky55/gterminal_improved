@@ -18,7 +18,7 @@ local main = vgui.RegisterTable({
         save:Dock(BOTTOM)
         save:SetText("Save")
         save.DoClick = function(s)
-            net.Start("gTerminal.Improved.Editor.Save")
+            net.Start("gTerminal_Improved.Editor.Save")
                 net.WriteEntity(self.entity)
                 net.WriteString(self.file_name)
                 net.WriteString(text_entry:GetValue())
@@ -45,7 +45,7 @@ function Editor:Close()
 end
 
 
-net.Receive("gTerminal.Improved.Editor.Open", function()
+net.Receive("gTerminal_Improved.Editor.Open", function()
     Editor:Open(net.ReadEntity(), net.ReadString(), net.ReadString())
 end)
 
