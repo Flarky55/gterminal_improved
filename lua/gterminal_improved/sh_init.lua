@@ -36,7 +36,7 @@ if SERVER then
     AddCSLuaFile("gterminal_improved/cl_editor.lua")
     
     
-    CreateConVar("gt_os_override", "0", {FCVAR_ARCHIVE}, "Should gTerminal-Improved override default personal and server os")
+    CreateConVar("gt_os_override", "0", {FCVAR_ARCHIVE}, "Should gTerminal-Improved override default personal and server OS")
 
 
     function gTerminal:Broadcast(entity, text, colorType, position)

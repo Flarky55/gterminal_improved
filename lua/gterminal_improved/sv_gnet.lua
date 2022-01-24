@@ -128,6 +128,7 @@ GNet.list = GNet.list or {}
 
 
 function GNet.Create(ent, name, pass)
+    if GNet.list[name] then gTerminal:Broadcast(ent, "Network already exists!") return end
     if ent.gnet_host then gTerminal:Broadcast(ent, 'You are currently hosting "' .. ent.gnet_host._name .. '"', GT_COL_ERR) return end
     if !name then gTerminal:Broadcast(ent, "Invalid name!", GT_COL_ERR) return end
 
