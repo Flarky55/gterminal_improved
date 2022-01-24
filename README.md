@@ -1,4 +1,5 @@
 # gTerminal Improved
+## Based on [gTerminal](https://steamcommunity.com/sharedfiles/filedetails/?id=109810455)
 
 Avaliable on [Steam Workshop](https://wiki.facepunch.com/gmod)
 
@@ -23,3 +24,9 @@ Allows you to create more different terminals
   (Client connected/disconnected)
 - Network Management <br/>
   (Ban/unban, kick)
+
+# More Info
+
+### ConVars:
+ - gt_os_override 0/1 <br/>
+   Should gTerminal-Improved override default personal and server OS
