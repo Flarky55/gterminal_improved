@@ -39,11 +39,12 @@ if SERVER then
     CreateConVar("gt_os_override", "0", {FCVAR_ARCHIVE}, "Should gTerminal-Improved override default personal and server OS")
 
 
-    function gTerminal:Broadcast(entity, text, colorType, position, xposition)
+    function gTerminal:Broadcast(entity, text, colorType, position, xposition, onlyColor)
         if ( !IsValid(entity) ) then
             return;
         end;
 
+        if !onlyColor then onlyColor = false end 
         text = tostring(text)
     
         local index = entity:EntIndex();
@@ -68,6 +69,7 @@ if SERVER then
                     net.WriteUInt(colorType or GT_COL_MSG, 8);
                     net.WriteInt(position and position + (k - 1) or -1, 16)
                     net.WriteInt(xposition and xposition or 0, 7)
+                    net.WriteBool(onlyColor)
                 net.Broadcast();
             end;
         else
@@ -77,6 +79,7 @@ if SERVER then
                 net.WriteUInt(colorType or GT_COL_MSG, 8);
                 net.WriteInt(position or -1, 16);
                 net.WriteInt(xposition and xposition or 0, 7)
+                net.WriteBool(onlyColor)
             net.Broadcast();
         end;
     end;
@@ -92,15 +95,22 @@ if CLIENT then
         local colorType = net.ReadUInt(8);
         local position = net.ReadInt(16);
         local xposition = net.ReadInt(7)
-
+        local only_color = net.ReadBool()
 
         local ent = Entity(index)
         local maxChars = ent.maxChars
 
-    
+
         if ( !gTerminal[index] ) then
             gTerminal[index] = {};
         end;
+
+        if only_color then
+            if gTerminal[index][position] then
+                gTerminal[index][position].color = colorType
+            end
+            return
+        end
     
         if (!position or position == -1) then
             table.insert( gTerminal[index], {text = text, color = colorType} );
