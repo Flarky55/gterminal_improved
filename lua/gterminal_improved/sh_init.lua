@@ -39,15 +39,17 @@ if SERVER then
     CreateConVar("gt_os_override", "0", {FCVAR_ARCHIVE}, "Should gTerminal-Improved override default personal and server OS")
 
 
-    function gTerminal:Broadcast(entity, text, colorType, position)
+    function gTerminal:Broadcast(entity, text, colorType, position, xposition)
         if ( !IsValid(entity) ) then
             return;
         end;
+
+        text = tostring(text)
     
         local index = entity:EntIndex();
         local output;
         local maxChars = entity.maxChars or 50
-    
+
         if (utf8.len(text) > maxChars) then
             output = {};
     
@@ -65,6 +67,7 @@ if SERVER then
                     net.WriteString(v);
                     net.WriteUInt(colorType or GT_COL_MSG, 8);
                     net.WriteInt(position and position + (k - 1) or -1, 16)
+                    net.WriteInt(xposition and xposition or 0, 7)
                 net.Broadcast();
             end;
         else
@@ -73,6 +76,7 @@ if SERVER then
                 net.WriteString(text);
                 net.WriteUInt(colorType or GT_COL_MSG, 8);
                 net.WriteInt(position or -1, 16);
+                net.WriteInt(xposition and xposition or 0, 7)
             net.Broadcast();
         end;
     end;
@@ -87,6 +91,12 @@ if CLIENT then
         local text = net.ReadString();
         local colorType = net.ReadUInt(8);
         local position = net.ReadInt(16);
+        local xposition = net.ReadInt(7)
+
+
+        local ent = Entity(index)
+        local maxChars = ent.maxChars
+
     
         if ( !gTerminal[index] ) then
             gTerminal[index] = {};
@@ -95,10 +105,58 @@ if CLIENT then
         if (!position or position == -1) then
             table.insert( gTerminal[index], {text = text, color = colorType} );
         else
-            gTerminal[index][position] = {text = text, color = colorType};
+            if xposition == 0 then
+                gTerminal[index][position] = {text = text, color = colorType};
+            else
+                local str = gTerminal[index][position].text
+                local nlen = maxChars + 1 - utf8.len(str)
+
+                if nlen > 0 then
+                    for i = 0, nlen do
+                        str = str .. " "
+                    end
+                end
+
+                local t = {}
+
+                if utf8.len(text) < 1 then
+                    for i = 1, utf8.len(str) do
+                        table.insert(t, string.sub(str, i, i)) 
+                    end
+                    table.remove(t, xposition)
+                    table.insert(t, xposition, text)
+                    
+                    local new_str = ""
+
+                    for k, v in pairs(t) do
+                        new_str = new_str .. t[k]
+                    end
+                    gTerminal[index][position] = {text = new_str, color = colorType}
+                else
+                    local tl = utf8.len(text)
+                    if tl + xposition > maxChars + 1 then
+                        text = string.sub(text, 0, maxChars + 1 - xposition)
+                    end
+                    for i = 1, utf8.len(str) do
+                        table.insert(t, string.sub(str, i, i))
+                    end
+                    for i = 1, tl do
+                        table.remove(t, xposition)
+                    end
+                    for i = tl, 1, -1 do
+                        table.insert(t, xposition, string.sub(text, i, i))
+                    end
+
+                    local new_str = ""
+                    for k, v in pairs(t) do
+                        new_str = new_str .. t[k]
+                    end
+                    gTerminal[index][position] = {text = new_str, color = colorType}
+                end
+            end
         end;
     
-        if (#gTerminal[index] > Entity(index).maxLines ) then
+        if (#gTerminal[index] > ent.maxLines ) then
             table.remove(gTerminal[index], 1);
         end;
     end);

@@ -11,7 +11,7 @@ GNet.commands = {
                 for name, gnet in pairs(GNet.list) do
                     index = index + 1
 
-                    gTerminal:Broadcast(ent, "    " .. index .. ". " .. gnet._name)
+                    gTerminal:Broadcast(ent, "    " .. index .. ". " .. name .. (gnet._pass and " (PRIVATE)" or " (PUBLIC)"))
                 end
 
                 gTerminal:Broadcast(ent, "");
@@ -21,7 +21,7 @@ GNet.commands = {
         },
         ["lu"] = {
             func = function(cl, ent, args)
-                if !ent.gnet_client then return end
+                if !ent.gnet_client then gTerminal:Broadcast("You aren't connected to a network", GT_COL_ERR) return end
 
                 gTerminal:Broadcast(ent, "ACTIVE USERS:")
 
@@ -29,7 +29,7 @@ GNet.commands = {
                 for _, client in ipairs(ent.gnet_client.clients) do
                     index = index + 1
 
-                    gTerminal:Broadcast(ent, "    " .. index .. ". " .. client:EntIndex())
+                    gTerminal:Broadcast(ent, "    " .. index .. ". " .. client:EntIndex() .. (client.gnet_host and " (HOST)" or "") )
                 end
 
                 gTerminal:Broadcast(ent, "")
@@ -54,7 +54,7 @@ GNet.commands = {
                 local id, file = args[2], Filesystem.GetFile(ent, args[3])
                 
                 if !ent.gnet_client then gTerminal:Broadcast(ent, "You aren't connected to a network!", GT_COL_ERR) return end
-                if !id then gTerminal:Broadcast(ent, "Invalid UserID!", GT_COL_ERR) return end 
+                if !id then gTerminal:Broadcast(ent, "Invalid UserID!", GT_COL_ERR) return end
 
                 GNet.SendFile(ent, ent.gnet_client, id, file)
             end,
@@ -128,13 +128,13 @@ GNet.list = GNet.list or {}
 
 
 function GNet.Create(ent, name, pass)
-    if GNet.list[name] then gTerminal:Broadcast(ent, "Network already exists!") return end
+    if GNet.list[name] then gTerminal:Broadcast(ent, "Network already exists!", GT_COL_ERR) return end
     if ent.gnet_host then gTerminal:Broadcast(ent, 'You are currently hosting "' .. ent.gnet_host._name .. '"', GT_COL_ERR) return end
     if !name then gTerminal:Broadcast(ent, "Invalid name!", GT_COL_ERR) return end
 
 
     local str = 'Network "' .. name .. '"'
-    if pass then str = str .. 'with password "' .. pass .. '"' end
+    if pass then str = str .. ' with password "' .. pass .. '"' end
     str = str .. " created!"
 
     gTerminal:Broadcast(ent, str, GT_COL_SUCC)
@@ -204,14 +204,10 @@ function GNet.Leave(ent, reason)
         if client == ent then table.remove(gnet.clients, i) break end
     end
 
-    
-    local str = 'Client "' .. ent:EntIndex() ..  '" disconnected!'
-    if reason then str = str .. " (" .. reason .. ")" end
-    GNet.Broadcast(gnet, str, GT_COL_INFO)
 
-    local str = '[GNET] Dropped from "' .. gnet._name .. '"'
-    if reason then str = str .. " (" .. reason .. ")" end 
-    gTerminal:Broadcast(ent, str, GT_COL_INFO)
+    reason = reason and " (" .. reason .. ")" or ""
+    GNet.Broadcast(gnet, 'Client "' .. ent:EntIndex() ..  '" disconnected!' .. reason, GT_COL_INFO)
+    gTerminal:Broadcast(ent, '[GNET] Dropped from "' .. gnet._name .. '"' .. reason, GT_COL_INFO)
 
 
     ent.gnet_client = nil
