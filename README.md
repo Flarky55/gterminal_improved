@@ -1,7 +1,7 @@
 # gTerminal Improved
 ## Based on [gTerminal](https://steamcommunity.com/sharedfiles/filedetails/?id=109810455)
 
-Avaliable on [Steam Workshop](https://wiki.facepunch.com/gmod)
+Avaliable on [Steam Workshop](https://steamcommunity.com/sharedfiles/filedetails/?id=2731487964)
 
 See also [gTASM](https://steamcommunity.com/sharedfiles/filedetails/?id=2670018381) <br/>
 :warning: **gTerminal Imrpoved may cause conflicts with gTASM!** :warning:
