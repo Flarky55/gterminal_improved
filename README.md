@@ -4,7 +4,7 @@
 Avaliable on [Steam Workshop](https://wiki.facepunch.com/gmod)
 
 See also [gTASM](https://steamcommunity.com/sharedfiles/filedetails/?id=2670018381) <br/>
-:warning: **gTerminal Imrpoved is currently causing conflicts with gTASM!** :warning:
+:warning: **gTerminal Imrpoved may cause conflicts with gTASM!** :warning:
 
 
 # Features
