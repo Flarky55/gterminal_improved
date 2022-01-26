@@ -166,7 +166,7 @@ if CLIENT then
             end
         end;
     
-        if (#gTerminal[index] > ent.maxLines ) then
+        if (#gTerminal[index] > (ent.maxLines or 24) ) then
             table.remove(gTerminal[index], 1);
         end;
     end);
